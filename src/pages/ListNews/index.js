@@ -1,82 +1,95 @@
-import React, {useState, useEffect, useRef, useMemo} from 'react';
-import {View, StyleSheet, FlatList, Linking} from 'react-native';
+import React, {useState, useEffect, useRef} from 'react';
+import {View, StyleSheet, FlatList, Linking, Dimensions} from 'react-native';
 
+import NewsCard from './NewsCard';
 import SearchBar from '../../components/SearchBar';
-import NewsCard from '../../components/NewsCard';
 import StyledModal from '../../components/StyledModal';
 import Loader from '../../components/Loader';
+import StyledText from '../../components/StyledText';
 
 const initialNumToRender = 8;
-const onEndReachedThreshold = 0.5;
+const onEndReachedThreshold = 1.5;
+const windowHeight = Dimensions.get('window').height - 100;
 
 const ListNews = ({
   news,
   warning,
   isFetching,
   isLoading,
+  isSorting,
+  isRefreshing,
   onFetchData,
   onLoadData,
-  onFilter,
+  onSort,
+  onRefresh,
+  onShowWarning,
   onHideWarning,
 }) => {
-  const [refreshing, setRefreshing] = useState(false);
-  const [highlight, setHighlight] = useState('');
+  const [highlightText, setHighlightText] = useState('');
   const refTextInput = useRef(null);
+  const refFlatList = useRef(null);
 
   useEffect(() => {
     onFetchData && onFetchData();
   }, []);
 
   const handlePress = (link) => async () => {
-    const supported = await Linking.canOpenURL(`ы${link}`);
+    const supported = await Linking.canOpenURL(`s${link}`);
+    const newError = 'Некорректная ссылка';
 
     if (supported) {
       await Linking.openURL(link);
     } else {
-      // setError('Некорректная ссылка');
+      onShowWarning(newError);
     }
   };
 
-  const handleScroll = ({nativeEvent}) => {
+  const handleLoadMore = () => {
+    if (!isSorting) {
+      onLoadData && onLoadData();
+    }
+  };
+
+  const handleScroll = () => {
     refTextInput.current.blur();
   };
 
-  // const handleFilterNews = (text) => {
-  //   setNews(
-  //     newsConst.current.filter((el) => el.title.toLowerCase().includes(text)),
-  //   );
-  //
-  //   setHighlight(text);
-  // };
+  const handleRefresh = () => {
+    onRefresh && onRefresh();
+  };
 
-  // const handleRefresh = () => {
-  //   setRefreshing(true);
-  //
-  //   return () => {
-  //     setRefreshing(false);
-  //   };
-  // };
+  const handleScrollToTop = () => {
+    refFlatList.current.scrollToOffset({animated: true, y: 0});
+  };
 
-  const handleLoadMore = () => {
-    onLoadData && onLoadData();
+  const handleCleanHighlight = () => {
+    setHighlightText('');
+    onSort && onSort('');
   };
 
   const renderItem = ({item}) => {
-    // console.log(index);
     return (
       <NewsCard
         title={item.title}
-        highlight={highlight}
+        highlightText={highlightText}
         imageUrl={item.imageUrl}
+        source={item.newsSite}
+        published={item.publishedAt}
         onPress={handlePress(item.url)}
       />
     );
   };
 
   const renderFooterLoader = () => {
+    return <Loader />;
+  };
+
+  const renderEmptyList = () => {
     return (
-      <View style={styles.listNews__footer}>
-        <Loader />
+      <View style={styles.listNews__emptyWrp}>
+        <StyledText style={styles.listNews__emptyText}>
+          Список новостей пуст
+        </StyledText>
       </View>
     );
   };
@@ -84,57 +97,65 @@ const ListNews = ({
   if (isFetching) {
     return <Loader size={'large'} />;
   }
-  // console.log(news);
+
   return (
-    <View style={styles.home}>
+    <>
       <SearchBar
         ref={refTextInput}
-        onFilter={onFilter}
-        onHighlight={setHighlight}
+        text={highlightText}
+        onSort={onSort}
+        setText={setHighlightText}
+        onClean={handleCleanHighlight}
+        onScroll={handleScrollToTop}
       />
 
       <FlatList
+        ref={refFlatList}
         data={news}
         renderItem={renderItem}
-        keyExtractor={(item: object) => item.id}
-        onScroll={handleScroll}
-        // onRefresh={handleRefresh}
-        refreshing={refreshing}
+        keyExtractor={(item) => item.id.toString()}
+        refreshing={isRefreshing}
+        onRefresh={handleRefresh}
         removeClippedSubviews={true}
-        windowSize={11}
-        // ListEmptyComponent={() => {}}
-        ListFooterComponent={isLoading && renderFooterLoader}
-        // ListFooterComponentStyle={() => {}}
+        scrollEnabled={!!news.length}
         initialNumToRender={initialNumToRender}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={onEndReachedThreshold}
+        onScrollBeginDrag={handleScroll}
+        ListFooterComponent={isLoading && !isSorting && renderFooterLoader}
+        ListEmptyComponent={renderEmptyList}
+        ListFooterComponentStyle={styles.listNews__footer}
       />
 
       <StyledModal
         state={warning}
         text={warning}
         isTransparent={true}
-        isButton={true}
+        hasButton={true}
         onClose={onHideWarning}
       />
-    </View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  home: {
+  listNews__emptyWrp: {
     flex: 1,
-    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: windowHeight,
+  },
+
+  listNews__emptyText: {
+    fontSize: 24,
+    color: '#7d869b',
+    fontFamily: 'Roboto-Regular',
   },
 
   listNews__footer: {
-    height: 60,
+    marginTop: 30,
+    marginBottom: 30,
   },
 });
 
 export default ListNews;
-
-// TODO: 1) При load контента думаю лучше в саге юзать takeLatest + 2) Скролл не отрубать не юзабельно +
-// 3) Повторяющийся контент проверить мой ли это косяк с редьюсером или чем еще + 4) И допиливать остальное
-
-// 5) Узнать когда закончились посты чтобы выключать Loader в футере скролла

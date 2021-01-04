@@ -5,44 +5,44 @@ import {compose} from '../../helpers/stylecompose';
 import StyledText from '../StyledText';
 import StyledButton from '../StyledButton';
 
-export default class StyledModal extends React.PureComponent {
-  render() {
-    const {
-      state,
-      text,
-      isButton,
-      isTransparent,
-      onClose,
-      children,
-      style,
-      ...rest
-    } = this.props;
+export const StyledModal = ({
+  state,
+  text,
+  hasButton,
+  isTransparent,
+  onClose,
+  children,
+  style,
+  ...rest
+}) => {
+  const handlePress = () => {
+    onClose && onClose();
+  };
 
-    return (
-      <Modal
-        visible={state}
-        transparent={isTransparent}
-        animationType={'fade'}
-        {...rest}>
-        <TouchableWithoutFeedback onPress={onClose}>
-          <View style={compose(styles.styledModal, style)}>
-            <View style={styles.styledModal__modal}>
-              <StyledText style={styles.styledModal__text}>{text}</StyledText>
+  return (
+    <Modal
+      visible={!!state}
+      transparent={isTransparent}
+      animationType={'fade'}
+      {...rest}>
+      <TouchableWithoutFeedback onPress={handlePress}>
+        <View style={compose(styles.styledModal, style)}>
+          <View style={styles.styledModal__modal}>
+            <StyledText style={styles.styledModal__text}>{text}</StyledText>
 
-              {isButton && (
-                <StyledButton
-                  primary={true}
-                  text={'Закрыть'}
-                  onPress={onClose}
-                />
-              )}
-            </View>
+            {hasButton && (
+              <StyledButton
+                primary={true}
+                text={'Закрыть'}
+                onPress={handlePress}
+              />
+            )}
           </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-    );
-  }
-}
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+  );
+};
 
 const styles = StyleSheet.create({
   styledModal: {
@@ -53,19 +53,22 @@ const styles = StyleSheet.create({
   },
 
   styledModal__modal: {
-    backgroundColor: '#fffdee',
-    width: '70%',
+    backgroundColor: '#e5e2e3',
+    borderColor: '#dad7d8',
+    width: '80%',
     justifyContent: 'space-between',
     minHeight: 135,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#ebebeb',
     padding: 25,
   },
 
   styledModal__text: {
+    marginBottom: 25,
     textAlign: 'center',
     fontSize: 18,
     color: '#450700',
   },
 });
+
+export default StyledModal;

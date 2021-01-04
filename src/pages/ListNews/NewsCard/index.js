@@ -1,31 +1,26 @@
-import React, {useState} from 'react';
-import {StyleSheet, TouchableOpacity, View, Image} from 'react-native';
+import React from 'react';
+import moment from 'moment';
+import {StyleSheet, TouchableOpacity, View} from 'react-native';
 
-import StyledText from '../StyledText';
-import {compose} from '../../helpers/stylecompose';
-import Loader from '../Loader';
-import OptimizedImage from '../OptimizedImage';
+import StyledText from '../../../components/StyledText';
+import {compose} from '../../../helpers/stylecompose';
+import Loader from '../../../components/Loader';
+import OptimizedImage from '../../../components/OptimizedImage';
 
 const activeOpacity = 0.6;
+const numberOfLines = 2;
 
 export default class NewsCard extends React.PureComponent {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
       loading: false,
     };
   }
 
-  // const [loading, setLoading] = useState(false);
-
-  // const index = title.toLowerCase().indexOf(highlight.toLowerCase());
-  // const first = title.slice(0, index);
-  // const middle = title.slice(index, first.length + highlight.length);
-  // const last = title.slice(first.length + middle.length);
-
-  handleClick = () => {
-    const {onPress} = this.state;
+  handlePress = () => {
+    const {onPress} = this.props;
 
     onPress && onPress();
   };
@@ -41,26 +36,34 @@ export default class NewsCard extends React.PureComponent {
   render() {
     const {loading} = this.state;
     const {
-      imageUrl,
       title,
-      highlight,
+      highlightText,
+      imageUrl,
+      source,
+      published,
       onPress,
       containerStyle,
       ...rest
     } = this.props;
 
-    const index = title.toLowerCase().indexOf(highlight.toLowerCase());
+    const index = title.toLowerCase().indexOf(highlightText.toLowerCase());
     const first = title.slice(0, index);
-    const middle = title.slice(index, first.length + highlight.length);
+    const middle = title.slice(index, first.length + highlightText.length);
     const last = title.slice(first.length + middle.length);
+    const date =
+      moment(published).format('MMMM Do ') +
+      ' at ' +
+      moment(published).format('h:mm');
 
     return (
       <TouchableOpacity
         activeOpacity={activeOpacity}
-        onPress={this.handleClick}>
+        onPress={this.handlePress}>
         <View style={compose(styles.newsCard, containerStyle)} {...rest}>
           {index > -1 ? (
-            <StyledText styles={styles.newsCard__title} numberOfLines={1}>
+            <StyledText
+              styles={styles.newsCard__title}
+              numberOfLines={numberOfLines}>
               {first}
               <StyledText
                 styles={[
@@ -72,7 +75,9 @@ export default class NewsCard extends React.PureComponent {
               {last}
             </StyledText>
           ) : (
-            <StyledText styles={styles.newsCard__title} numberOfLines={1}>
+            <StyledText
+              styles={styles.newsCard__title}
+              numberOfLines={numberOfLines}>
               {title}
             </StyledText>
           )}
@@ -88,18 +93,26 @@ export default class NewsCard extends React.PureComponent {
               onLoadEnd={this.handleLoadEnd}
             />
           </View>
+
+          <View style={styles.newsCard__subTitleWrp}>
+            <StyledText
+              style={
+                styles.newsCard__subTitle
+              }>{`Source: ${source}`}</StyledText>
+
+            <StyledText
+              style={[
+                styles.newsCard__subTitle,
+                styles['newsCard__subTitle--date'],
+              ]}>
+              {date}
+            </StyledText>
+          </View>
         </View>
       </TouchableOpacity>
     );
   }
 }
-
-// imageUrl,
-//   title,
-//   highlight,
-//   onPress,
-//   containerStyle,
-// ...rest
 
 const styles = StyleSheet.create({
   newsCard: {
@@ -117,13 +130,31 @@ const styles = StyleSheet.create({
   },
 
   newsCard__title: {
-    fontSize: 20,
+    fontSize: 18,
   },
 
   'newsCard__title--bold': {
     fontWeight: 'bold',
     color: '#000',
     backgroundColor: 'rgba(255,254,178,0.73)',
+  },
+
+  newsCard__subTitleWrp: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+
+  newsCard__subTitle: {
+    flex: 1,
+    color: '#000',
+    fontSize: 16,
+  },
+
+  'newsCard__subTitle--date': {
+    textAlign: 'right',
+    fontSize: 14,
   },
 
   newsCard__wrapImg: {
@@ -135,5 +166,6 @@ const styles = StyleSheet.create({
     borderColor: '#f5f5f5',
     width: '100%',
     height: 150,
+    borderRadius: 8,
   },
 });

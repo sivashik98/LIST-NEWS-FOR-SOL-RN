@@ -1,31 +1,14 @@
-import React, {useState} from 'react';
-import {Text, View, StyleSheet} from 'react-native';
+import React from 'react';
+import {SafeAreaView} from 'react-navigation';
 
-export const HomeScreen = () => {
-  const [] = useState();
+import Home from '../../pages/Home';
 
+const ListNewsScreen = () => {
   return (
-    <View style={styles.home}>
-      <Text style={styles.home__line}>My room</Text>
-
-      <Text style={styles.home__line}>My room</Text>
-
-      <Text style={styles.home__line}>My room</Text>
-
-      <Text style={styles.home__line}>My room</Text>
-    </View>
+    <SafeAreaView style={{flex: 1}}>
+      <Home />
+    </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  home: {
-    backgroundColor: 'pink',
-  },
-
-  home__line: {
-    padding: 10,
-    backgroundColor: '#b0c7c2',
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-});
+export default ListNewsScreen;

@@ -13,8 +13,8 @@ const OptimizedImage = ({
     <FastImage
       source={{
         uri: source,
-        // headers: {Authorization: 'someAuthToken'},
         priority: FastImage.priority.high,
+        // cache: FastImage.cacheControl.cacheOnly,
       }}
       resizeMode={FastImage.resizeMode[resizeMode]}
       onLoadStart={onLoadStart}

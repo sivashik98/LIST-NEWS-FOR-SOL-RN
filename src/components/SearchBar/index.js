@@ -1,32 +1,55 @@
-import React, {useState, forwardRef} from 'react';
-import {View, StyleSheet, TextInput} from 'react-native';
+import React, {forwardRef} from 'react';
+import {View, StyleSheet, TextInput, TouchableOpacity} from 'react-native';
 
 import SearchSVG from '../../../assets/svg/Search';
+import CleanSvg from '../../../assets/svg/Clean';
 import {compose} from '../../helpers/stylecompose';
 
-const SearchBar = forwardRef(
-  ({placeholder, containerStyle, onFilter, onHighlight}, refTextInput) => {
-    const [value, setValue] = useState('');
+const activeOpacity = 0.6;
 
-    const handleChangeText = (text) => {
-      setValue(text);
-      onHighlight(text);
-      onFilter(text);
+const SearchBar = forwardRef(
+  (
+    {
+      placeholder = 'Введите текст...',
+      text,
+      onScroll,
+      onSort,
+      setText,
+      onClean,
+      containerStyle,
+    },
+    refTextInput,
+  ) => {
+    const handleChangeText = (value) => {
+      setText && setText(value);
+      onSort && onSort(value);
+      onScroll && onScroll();
+    };
+
+    const handlePress = () => {
+      onClean && onClean();
     };
 
     return (
-      <View style={compose(styles.wrapper, containerStyle)}>
+      <View style={compose(styles.searchBar__wrapper, containerStyle)}>
         <View style={styles.searchBar}>
-          <SearchSVG style={styles.searchBar__icon} />
+          <SearchSVG style={styles.searchBar__iconSearch} />
 
           <TextInput
             ref={refTextInput}
-            value={value}
+            value={text}
             numberOfLines={1}
-            placeholder={placeholder || 'Введите текст...'}
+            placeholder={placeholder}
             style={styles.searchBar__input}
             onChangeText={handleChangeText}
           />
+
+          <TouchableOpacity
+            activeOpacity={activeOpacity}
+            onPress={handlePress}
+            style={styles.searchBar__iconCleanWrp}>
+            <CleanSvg style={styles.searchBar__iconClean} />
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -34,7 +57,7 @@ const SearchBar = forwardRef(
 );
 
 const styles = StyleSheet.create({
-  wrapper: {
+  searchBar__wrapper: {
     backgroundColor: '#fff',
     borderRadius: 2,
     shadowColor: '#000',
@@ -54,8 +77,17 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ababab',
   },
 
-  searchBar__icon: {
-    marginRight: 20,
+  searchBar__iconSearch: {
+    marginRight: 15,
+  },
+
+  searchBar__iconCleanWrp: {
+    padding: 7,
+  },
+
+  searchBar__iconClean: {
+    marginRight: 0,
+    marginLeft: 10,
   },
 
   searchBar__input: {

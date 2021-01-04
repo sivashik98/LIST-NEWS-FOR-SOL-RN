@@ -1,19 +1,22 @@
 import React from 'react';
 import {SafeAreaView} from 'react-navigation';
-
 import {useDispatch, useSelector} from 'react-redux';
+
+import ListNews from '../../pages/ListNews';
 import {
   fetchNews,
   loadNews,
+  sortNews,
+  refreshNews,
   hideWarning,
-  filterNews,
+  showWarning,
 } from '../../store/actions/news';
-
-import ListNews from '../../pages/ListNews';
 import {
   getNews,
   getFetchingStatus,
   getLoadingStatus,
+  getSortingStatus,
+  getRefreshingStatus,
   getWarning,
 } from '../../store/selectors/news';
 
@@ -22,7 +25,9 @@ const ListNewsScreen = () => {
   const news = useSelector(getNews);
   const isFetching = useSelector(getFetchingStatus);
   const isLoading = useSelector(getLoadingStatus);
-  const warning = useSelector(getWarning);
+  const isSorting = useSelector(getSortingStatus);
+  const isRefreshing = useSelector(getRefreshingStatus);
+  const storedWarning = useSelector(getWarning);
 
   const handleFetchData = () => {
     dispatch(fetchNews());
@@ -34,24 +39,36 @@ const ListNewsScreen = () => {
     dispatch(loadNews(from));
   };
 
-  const handleFilterData = (filterLetters) => {
-    dispatch(filterNews(filterLetters));
+  const handleSortData = (sortLetters) => {
+    dispatch(sortNews(sortLetters));
+  };
+
+  const handleRefreshData = () => {
+    dispatch(refreshNews());
   };
 
   const handleHideWarning = () => {
     dispatch(hideWarning());
   };
 
+  const handleShowWarning = (warning) => {
+    dispatch(showWarning(warning));
+  };
+
   return (
     <SafeAreaView style={{flex: 1}}>
       <ListNews
         news={news}
-        warning={warning}
+        warning={storedWarning}
         isLoading={isLoading}
         isFetching={isFetching}
+        isSorting={isSorting}
+        isRefreshing={isRefreshing}
         onFetchData={handleFetchData}
         onLoadData={handleLoadData}
-        onFilter={handleFilterData}
+        onSort={handleSortData}
+        onRefresh={handleRefreshData}
+        onShowWarning={handleShowWarning}
         onHideWarning={handleHideWarning}
       />
     </SafeAreaView>
