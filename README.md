@@ -1,6 +1,6 @@
 # list-news-ReactNative 
 
-test task
+Test task
 
 # Steps to run app(much easier perform all the steps via git bush or simple console).
 
