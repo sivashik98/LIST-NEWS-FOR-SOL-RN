@@ -34,7 +34,7 @@ const ListNews = ({
   }, []);
 
   const handlePress = (link) => async () => {
-    const supported = await Linking.canOpenURL(`s${link}`);
+    const supported = await Linking.canOpenURL(`${link}`);
     const newError = 'Некорректная ссылка';
 
     if (supported) {
